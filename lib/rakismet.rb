@@ -21,11 +21,11 @@ module Rakismet
       def validate_key
         validate_constants
         akismet = URI.parse(verify_url)
-        _, valid = Net::HTTP.start(akismet.host) do |http|
+        valid = Net::HTTP.start(akismet.host) do |http|
           data = "key=#{Rakismet::KEY}&blog=#{Rakismet::URL}"
           http.post(akismet.path, data, Rakismet::HEADERS)
         end
-        self.valid_key = (valid == 'valid')
+        self.valid_key = (valid.body == 'valid')
       end
       
       def valid_key?
@@ -36,11 +36,11 @@ module Rakismet
         validate_constants
         args.merge!(:blog => Rakismet::URL)
         akismet = URI.parse(call_url(function))
-        _, response = Net::HTTP.start(akismet.host) do |http|
+        response = Net::HTTP.start(akismet.host) do |http|
           data = args.map { |k,v| "#{k}=#{CGI.escape(v.to_s)}" }.join('&')
           http.post(akismet.path, data, Rakismet::HEADERS)
         end
-        response
+        response.body
       end
       
       protected
